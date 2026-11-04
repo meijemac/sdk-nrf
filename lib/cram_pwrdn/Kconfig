@@ -1,0 +1,32 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig CRAM_POWER_DOWN_LIBRARY
+	bool "API for turning off unused Code RAM (CRAM) banks"
+	depends on SOC_NRF55FE00A_ENGA_CPUAPP
+	# Powering down memory blocks can only be done from the secure domain
+	depends on !TRUSTED_EXECUTION_NONSECURE
+	imply NRF_FORCE_RAM_ON_REBOOT
+	help
+	  This allows application to call API for powering CRAM banks on and
+	  off in the System ON mode. A powered off bank loses its content, so
+	  only banks that do not hold the application image can be turned off.
+	  With NRF_FORCE_RAM_ON_REBOOT, all CRAM banks are powered on again
+	  before a soft reset, so that the next image can be loaded into them.
+
+if CRAM_POWER_DOWN_LIBRARY
+
+config CRAM_POWER_DOWN_UNUSED_AT_BOOT
+	bool "Power down unused CRAM banks during system initialization"
+	help
+	  Call power_down_unused_cram() at the APPLICATION initialization
+	  level, so that the application does not have to call it.
+
+module = CRAM_POWERDOWN
+module-str = CRAM power-down library
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+endif # CRAM_POWER_DOWN_LIBRARY
