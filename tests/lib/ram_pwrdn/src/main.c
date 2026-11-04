@@ -53,6 +53,11 @@ static volatile uint32_t *unused_ram_word(void)
 	/* RAM03 cannot be fully powered down, so probe the top of RAM02. */
 	probe = DT_REG_ADDR(DT_NODELABEL(ram02_sram)) +
 		DT_REG_SIZE(DT_NODELABEL(ram02_sram)) - sizeof(uint32_t);
+#elif defined(CONFIG_SOC_SERIES_NRF55)
+	/* SRAM does not end on a 32 kB section boundary, so the top section
+	 * cannot be fully powered down. Probe the top of the last whole section.
+	 */
+	probe = ROUND_DOWN(ram_end, KB(32)) - sizeof(uint32_t);
 #endif
 
 	return (volatile uint32_t *)probe;
